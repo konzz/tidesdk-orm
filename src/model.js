@@ -7,14 +7,8 @@ function timodel(resource, schema, db){
         },
 
         find: function(pattern){
-            var rows = db.execute('SELECT * FROM ' + resource);
-            var data = this.rowsToCollection(rows);
-
-            if(pattern){
-                data = filterRows(data, pattern);
-            }
-
-            return data;
+            var rows = db.execute(findComand(pattern));
+            return this.rowsToCollection(rows);
         },
 
         create: function(data){
@@ -77,6 +71,18 @@ function timodel(resource, schema, db){
         });
 
         return 'UPDATE ' + resource + ' SET ' + propertiesToUpdate.join(', ') + ' WHERE id == ' + data.id;
+    }
+
+    function findComand(pattern){
+        var command = 'SELECT * FROM ' + resource;
+        if(pattern){
+            var propertiesToFIlterBy = [];
+            Object.keys(pattern).forEach(function(property){
+                propertiesToFIlterBy.push(property + ' == "' + pattern[property] + '"');
+            });
+            command += ' WHERE ' + propertiesToFIlterBy.join(' AND ');
+        }
+        return command;
     }
 
     function createTableCommand(resource, schema){
